@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class ElevatorSystem(models.Model):
@@ -35,6 +36,7 @@ class Elevator(models.Model):
 class ElevatorRequest(models.Model):
     REQUEST_STATUS_CHOICES = [
         ("done", "Done"),
+        ("in_service", "In_Service"),
         ("in_process", "In_Process"),
     ]
 
@@ -44,5 +46,6 @@ class ElevatorRequest(models.Model):
     to_floor = models.PositiveIntegerField()
     from_floor = models.PositiveIntegerField()
     request_status = models.CharField(
-        max_length=20, choices=REQUEST_STATUS_CHOICES, default="In_Process"
+        max_length=20, choices=REQUEST_STATUS_CHOICES, default="in_process"
     )
+    created = models.DateTimeField(auto_now_add=True)

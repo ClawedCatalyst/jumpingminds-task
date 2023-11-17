@@ -6,8 +6,8 @@ from . import models
 
 
 class ABS(Func):
-    
     function = "ABS"
+
 
 def create_elevator_system(name: str, no_of_floors: int) -> models.ElevatorSystem:
     elevator_system_obj = models.ElevatorSystem.objects.create(
@@ -38,17 +38,19 @@ def get_closest_available_elevator(from_floor: int) -> models.Elevator:
 
     busy_elevators = models.Elevator.objects.filter(current_status="busy")
     busy_elevator_time = sys.maxsize
-    
+
     if busy_elevators:
         closest_busy_elevator = busy_elevators[0]
         for elevator in busy_elevators:
             elevator_time_to_reach = 0
             elevator_requests = models.ElevatorRequest.objects.filter(
                 elevator=elevator, request_status="in_process"
-            ).order_by("-created_at")
+            ).order_by("-created")
             previous_floor = elevator.current_floor
             for elevator_request in elevator_requests:
-                elevator_time_to_reach += abs(elevator_request.from_floor - previous_floor)
+                elevator_time_to_reach += abs(
+                    elevator_request.from_floor - previous_floor
+                )
                 elevator_time_to_reach += abs(
                     elevator_request.from_floor - elevator_request.to_floor
                 )
@@ -74,3 +76,59 @@ def create_elevator_request(
     return models.ElevatorRequest.objects.create(
         elevator=closest_elevator, to_floor=to_floor, from_floor=from_floor
     )
+
+
+def move_elevator_by_one_floor():
+    elevators = models.Elevator.objects.filter(current_status="busy")
+    for elevator in elevators:
+        elevator_request = (
+            models.ElevatorRequest.objects.filter(
+                elevator=elevator, request_status__in=["in_process", "in_service"]
+            )
+            .order_by("created")
+            .first()
+        )
+
+        if elevator_request:
+            if (
+                elevator_request.request_status == "in_process"
+                and elevator.current_floor < elevator_request.to_floor
+            ):
+                elevator.current_floor += 1
+                if elevator.current_floor == elevator_request.to_floor:
+                    elevator_request.request_status = "in_service"
+                elevator_request.save()
+                elevator.save()
+            elif (
+                elevator_request.request_status == "in_process"
+                and elevator.current_floor > elevator_request.to_floor
+            ):
+                elevator.current_floor -= 1
+                if elevator.current_floor == elevator_request.to_floor:
+                    elevator_request.request_status = "in_service"
+                elevator_request.save()
+                elevator.save()
+            elif (
+                elevator_request.request_status == "in_process"
+                and elevator.current_floor == elevator_request.to_floor
+            ):
+                elevator_request.request_status = "in_service"
+                elevator_request.save()
+            elif (
+                elevator_request.request_status == "in_service"
+                and elevator.current_floor < elevator_request.from_floor
+            ):
+                elevator.current_floor += 1
+                if elevator.current_floor == elevator_request.from_floor:
+                    elevator_request.request_status = "done"
+                elevator_request.save()
+                elevator.save()
+            elif (
+                elevator_request.request_status == "in_service"
+                and elevator.current_floor > elevator_request.from_floor
+            ):
+                elevator.current_floor -= 1
+                if elevator.current_floor == elevator_request.from_floor:
+                    elevator_request.request_status = "done"
+                elevator_request.save()
+                elevator.save()

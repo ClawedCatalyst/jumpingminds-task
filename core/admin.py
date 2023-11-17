@@ -6,3 +6,4 @@ from . import models
 
 admin.site.register(models.Elevator)
 admin.site.register(models.ElevatorSystem)
+admin.site.register(models.ElevatorRequest)
