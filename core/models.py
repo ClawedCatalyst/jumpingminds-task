@@ -33,7 +33,9 @@ class Elevator(models.Model):
 
 
 class ElevatorRequest(models.Model):
-    elevator = models.ForeignKey(Elevator, related_name="elevator_requests", on_delete=models.CASCADE)
+    elevator = models.ForeignKey(
+        Elevator, related_name="elevator_requests", on_delete=models.CASCADE
+    )
     to_floor = models.PositiveIntegerField()
     from_floor = models.PositiveIntegerField()
     is_busy = models.BooleanField(default=False)
