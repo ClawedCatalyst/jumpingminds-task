@@ -9,3 +9,10 @@ class CreateElevatorSystemViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
+
+
+class CreateElevatorRequestViewSet(ModelViewSet):
+    serializer_class = serializers.ElevatorRequestSerializer
+
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)

@@ -33,9 +33,16 @@ class Elevator(models.Model):
 
 
 class ElevatorRequest(models.Model):
+    REQUEST_STATUS_CHOICES = [
+        ("done", "Done"),
+        ("in_process", "In_Process"),
+    ]
+
     elevator = models.ForeignKey(
         Elevator, related_name="elevator_requests", on_delete=models.CASCADE
     )
     to_floor = models.PositiveIntegerField()
     from_floor = models.PositiveIntegerField()
-    is_busy = models.BooleanField(default=False)
+    request_status = models.CharField(
+        max_length=20, choices=REQUEST_STATUS_CHOICES, default="In_Process"
+    )
