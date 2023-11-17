@@ -30,3 +30,10 @@ class Elevator(models.Model):
     current_floor = models.PositiveIntegerField(default=1)
     next_floor = models.PositiveIntegerField(default=1)
     previous_floor = models.PositiveIntegerField(default=1)
+
+
+class ElevatorRequest(models.Model):
+    elevator = models.ForeignKey(Elevator, related_name="elevator_requests", on_delete=models.CASCADE)
+    to_floor = models.PositiveIntegerField()
+    from_floor = models.PositiveIntegerField()
+    is_busy = models.BooleanField(default=False)
