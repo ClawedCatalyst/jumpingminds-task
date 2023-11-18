@@ -51,7 +51,9 @@ def create_n_elevators(
     return "Done"
 
 
-def get_closest_available_elevator(from_floor: int, elevator_system: int) -> models.Elevator:
+def get_closest_available_elevator(
+    from_floor: int, elevator_system: int
+) -> models.Elevator:
     """
     Find the closest available elevator based on the requested floor.
 
@@ -62,7 +64,9 @@ def get_closest_available_elevator(from_floor: int, elevator_system: int) -> mod
         models.Elevator: The closest available elevator.
     """
     closest_available_elevator = (
-        models.Elevator.objects.filter(current_status="available", elevator_system=elevator_system)
+        models.Elevator.objects.filter(
+            current_status="available", elevator_system=elevator_system
+        )
         .annotate(distance_to_requested=Min(ABS(F("current_floor") - from_floor)))
         .order_by("distance_to_requested")
         .first()
@@ -70,7 +74,9 @@ def get_closest_available_elevator(from_floor: int, elevator_system: int) -> mod
 
     if closest_available_elevator:
         # Calculate time to reach the available elevator
-        available_elevator_time = abs(closest_available_elevator.current_floor - from_floor)
+        available_elevator_time = abs(
+            closest_available_elevator.current_floor - from_floor
+        )
     else:
         available_elevator_time = sys.maxsize
 
@@ -112,7 +118,10 @@ def get_closest_available_elevator(from_floor: int, elevator_system: int) -> mod
 
 
 def create_elevator_request(
-    to_floor: int, from_floor: int, closest_elevator: models.Elevator, elevator_system: int
+    to_floor: int,
+    from_floor: int,
+    closest_elevator: models.Elevator,
+    elevator_system: int,
 ) -> models.ElevatorRequest:
     """
     Create an elevator request for the chosen elevator.
@@ -126,7 +135,10 @@ def create_elevator_request(
         models.ElevatorRequest: The created elevator request object.
     """
     return models.ElevatorRequest.objects.create(
-        elevator=closest_elevator, to_floor=to_floor, from_floor=from_floor, elevator_system=elevator_system
+        elevator=closest_elevator,
+        to_floor=to_floor,
+        from_floor=from_floor,
+        elevator_system=elevator_system,
     )
 
 

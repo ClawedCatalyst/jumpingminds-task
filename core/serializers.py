@@ -111,7 +111,13 @@ class ElevatorRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ElevatorRequest
-        fields = ["elevator", "elevator_system", "to_floor", "from_floor", "request_status"]
+        fields = [
+            "elevator",
+            "elevator_system",
+            "to_floor",
+            "from_floor",
+            "request_status",
+        ]
         extra_kwargs = {
             "elevator": {"read_only": True, "required": False},
         }
@@ -149,10 +155,15 @@ class ElevatorRequestSerializer(serializers.ModelSerializer):
         to_floor = data["to_floor"]
         elevator_system = data["elevator_system"]
 
-        closest_elevator = crud.get_closest_available_elevator(from_floor=from_floor, elevator_system=elevator_system)
+        closest_elevator = crud.get_closest_available_elevator(
+            from_floor=from_floor, elevator_system=elevator_system
+        )
         create_elevator_request = crud.create_elevator_request(
-            to_floor=to_floor, from_floor=from_floor, closest_elevator=closest_elevator, elevator_system=elevator_system
-        )   
+            to_floor=to_floor,
+            from_floor=from_floor,
+            closest_elevator=closest_elevator,
+            elevator_system=elevator_system,
+        )
 
         return create_elevator_request
 
