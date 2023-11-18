@@ -30,6 +30,9 @@ class ElevatorSystemSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 {"success": False, "data": {"error": "no_of_floors must be an integer"}}
             )
+        
+        return super().validate(data)
+            
 
     def create(self, data):
         """
