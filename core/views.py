@@ -33,6 +33,12 @@ class ElevatorViewSet(ModelViewSet):
         )
         return Response({"Next Destination Floor": elevator_destination_floor})
 
+    @action(methods=["patch"], detail=True)
+    def elevator_door_status(self, request, pk=None, door=None):
+        elevator = crud.update_elevator_door_status(elevator_id=pk, door=door)
+        serializer = serializers.ElevatorSerializer(elevator)
+        return Response(serializer.data)
+
 
 class CreateElevatorRequestViewSet(ModelViewSet):
     serializer_class = serializers.ElevatorRequestSerializer

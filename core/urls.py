@@ -30,4 +30,8 @@ urlpatterns = [
         "get-next-destination-floor/<int:pk>/",
         views.ElevatorViewSet.as_view({"get": "get_next_destination_floor"}),
     ),
+    path(
+        "door-status/<int:pk>/<int:door>/",
+        views.ElevatorViewSet.as_view({"patch": "elevator_door_status"}),
+    ),
 ]

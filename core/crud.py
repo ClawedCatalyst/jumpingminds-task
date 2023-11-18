@@ -135,6 +135,7 @@ def move_elevator_by_one_floor():
                 elevator.current_floor += 1
                 if elevator.current_floor == elevator_request.from_floor:
                     elevator_request.request_status = "done"
+                    elevator.current_status = "available"
                 elevator_request.save()
                 elevator.save()
             elif (
@@ -145,6 +146,7 @@ def move_elevator_by_one_floor():
                 elevator.current_floor -= 1
                 if elevator.current_floor == elevator_request.from_floor:
                     elevator_request.request_status = "done"
+                    elevator.current_status = "available"
                 elevator_request.save()
                 elevator.save()
 
@@ -198,3 +200,28 @@ def get_elevator_requests_for_elevator(elevator_id: int, done: bool or None):
 def get_destination_floor_for_elevator(elevator_id: int):
     elevator = models.Elevator.objects.filter(id=elevator_id).first()
     return elevator.next_floor
+
+
+def update_elevator_door_status(
+    elevator_id: int or None, door: int or None
+) -> models.Elevator:
+    elevator = models.Elevator.objects.filter(elevator=elevator_id).first()
+    if elevator.current_status == "maintenance":
+        raise ValidationError(
+            {"error": f"Elevator with id: {elevator_id} is currently under maintenance"}
+        )
+
+    if door and elevator.current_status == "busy":
+        raise ValidationError(
+            {
+                "error": f"Elevator with id: {elevator_id} is currently busy, door cannot be open"
+            }
+        )
+    if door:
+        elevator.door_status = "open"
+        elevator.save()
+    else:
+        elevator.door_status = "close"
+        elevator.save()
+
+    return elevator
