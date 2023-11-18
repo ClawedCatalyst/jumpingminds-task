@@ -1,6 +1,7 @@
 import sys
 
 from django.db.models import F, Func, Min
+from rest_framework.exceptions import ValidationError
 
 from . import models
 
@@ -37,7 +38,6 @@ def get_closest_available_elevator(from_floor: int) -> models.Elevator:
         .order_by("distance_to_requested")
         .first()
     )
-
     # Calculate time to reach the available elevator
     available_elevator_time = abs(closest_available_elevator.current_floor - from_floor)
 
@@ -154,7 +154,7 @@ def mark_maintainance(elevator_id: int) -> models.Elevator:
     if not elevator:
         pass
         # TODO validation when elevator does not exits with given elevator id
-        
+
     if elevator.current_status != "maintenance":
         elevator.current_status = "maintenance"
         elevator.door_status = "closed"
@@ -166,3 +166,17 @@ def mark_maintainance(elevator_id: int) -> models.Elevator:
 
 def get_elevators_count_from_elevator_system(elevator_system_id: int) -> int:
     return models.Elevator.objects.filter(elevator_system=elevator_system_id).count()
+
+
+def get_elevator_direction_up_or_down(elevator_id: int) -> str:
+    elevator = models.Elevator.objects.filter(id=elevator_id).first()
+    if elevator is None:
+        raise ValidationError(
+            f"Elevator with the given id: {elevator_id} does not exist"
+        )
+    if elevator.current_status == "available":
+        return f"Elevator with id: {elevator_id} is available, not moving"
+    if elevator.current_floor < elevator.next_floor:
+        return f"Elevator with {elevator_id} is moving up"
+    else:
+        return f"Elevator with id: {elevator_id} is moving down"
