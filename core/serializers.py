@@ -65,7 +65,12 @@ class ElevatorSystemSerializer(serializers.ModelSerializer):
         """
         data = super().to_representation(instance)
         responseData = {"success": True}
-        data["elevators-count"] = self.initial_data["elevators"]
+        try:
+            data["elevators-count"] = self.initial_data["elevators"]
+        except:
+            data["elevators-count"] = crud.get_elevators_count_from_elevator_system(
+                elevator_system_id=data["id"]
+            )
         responseData["data"] = data
         return data
 
