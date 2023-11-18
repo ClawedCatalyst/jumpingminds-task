@@ -62,6 +62,11 @@
 </div>
 
 
+## Elevator Request 
+To optimize elevator requests, a comparison is made between two potential elevators: one marked as "free" and the other as "busy." Prior to making a request, a condition check is implemented to assess the efficiency of each elevator. The system assigns the optimal elevator to the request by evaluating factors such as availability and processing time, ensuring that the chosen elevator is the most suitable for the given conditions.
+
+## Database Design 
+
 # SETUP
 
 1. Clone the repository:
