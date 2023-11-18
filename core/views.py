@@ -2,7 +2,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from . import crud, serializers, models
+from . import crud, models, serializers
 
 
 class CreateElevatorSystemViewSet(ModelViewSet):

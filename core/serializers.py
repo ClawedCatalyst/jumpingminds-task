@@ -8,6 +8,7 @@ class ElevatorSystemSerializer(serializers.ModelSerializer):
     """
     Serializer for the ElevatorSystem model.
     """
+
     class Meta:
         model = models.ElevatorSystem
         fields = ["id", "name", "no_of_floors"]
@@ -30,9 +31,8 @@ class ElevatorSystemSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 {"success": False, "data": {"error": "no_of_floors must be an integer"}}
             )
-        
+
         return super().validate(data)
-            
 
     def create(self, data):
         """
@@ -44,14 +44,14 @@ class ElevatorSystemSerializer(serializers.ModelSerializer):
         Returns:
             dict: The input data.
         """
-        no_of_elevators = data.get("elevators", 0)
+        data["elevators"] = self.initial_data["elevators"]
         elevator_system = crud.create_elevator_system(
             name=data["name"], no_of_floors=data["no_of_floors"]
         )
         crud.create_n_elevators(
-            no_of_elevators=no_of_elevators, elevator_system=elevator_system
+            no_of_elevators=data["elevators"], elevator_system=elevator_system
         )
-        return data
+        return elevator_system
 
     def to_representation(self, instance):
         """
@@ -65,9 +65,7 @@ class ElevatorSystemSerializer(serializers.ModelSerializer):
         """
         data = super().to_representation(instance)
         responseData = {"success": True}
-        data["elevators-count"] = crud.get_elevators_count_from_elevator_system(
-            elevator_system_id=data["id"]
-        )
+        data["elevators-count"] = self.initial_data["elevators"]
         responseData["data"] = data
         return data
 
@@ -76,6 +74,7 @@ class ElevatorSerializer(serializers.ModelSerializer):
     """
     Serializer for the Elevator model.
     """
+
     class Meta:
         model = models.Elevator
         fields = "__all__"
@@ -104,6 +103,7 @@ class ElevatorRequestSerializer(serializers.ModelSerializer):
     """
     Serializer for the ElevatorRequest model.
     """
+
     class Meta:
         model = models.ElevatorRequest
         fields = ["elevator", "to_floor", "from_floor", "request_status"]
