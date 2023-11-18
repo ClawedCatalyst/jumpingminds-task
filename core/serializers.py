@@ -65,7 +65,7 @@ class ElevatorRequestSerializer(serializers.ModelSerializer):
         return create_elevator_request
 
     def to_representation(self, instance):
-        data =  super().to_representation(instance)
+        data = super().to_representation(instance)
         responseData = {"success": True}
         responseData["data"] = data
         return responseData

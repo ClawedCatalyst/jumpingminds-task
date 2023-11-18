@@ -176,17 +176,25 @@ def get_elevator_direction_up_or_down(elevator_id: int) -> str:
         )
     if elevator.current_status == "available":
         return f"Elevator with id: {elevator_id} is available, not moving"
-    
+
     if elevator.current_status == "maintenance":
         return f"Elevator with id: {elevator_id} is under maintenance"
-    
+
     if elevator.current_floor < elevator.next_floor:
         return f"Elevator with {elevator_id} is moving up"
     else:
         return f"Elevator with id: {elevator_id} is moving down"
 
+
 def get_elevator_requests_for_elevator(elevator_id: int, done: bool or None):
     if done:
-        return models.ElevatorRequest.objects.filter(elevator=elevator_id, request_status="done")
+        return models.ElevatorRequest.objects.filter(
+            elevator=elevator_id, request_status="done"
+        )
     else:
         return models.ElevatorRequest.objects.filter(elevator=elevator_id)
+
+
+def get_destination_floor_for_elevator(elevator_id: int):
+    elevator = models.Elevator.objects.filter(id=elevator_id).first()
+    return elevator.next_floor

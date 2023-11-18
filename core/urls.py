@@ -23,6 +23,11 @@ urlpatterns = [
         views.ElevatorViewSet.as_view({"get": "get_elevator_direction"}),
     ),
     path(
-        "get-elevator-requests/<int:pk>/<int:done>/", views.CreateElevatorRequestViewSet.as_view({"get": "get_elevator_requests"})
-    )
+        "get-elevator-requests/<int:pk>/<int:done>/",
+        views.CreateElevatorRequestViewSet.as_view({"get": "get_elevator_requests"}),
+    ),
+    path(
+        "get-next-destination-floor/<int:pk>/",
+        views.ElevatorViewSet.as_view({"get": "get_next_destination_floor"}),
+    ),
 ]
