@@ -1,9 +1,8 @@
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
 
-from . import serializers
-from . import crud
+from . import crud, serializers
 
 
 class CreateElevatorSystemViewSet(ModelViewSet):
@@ -11,6 +10,16 @@ class CreateElevatorSystemViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
+
+
+class ElevatorViewSet(ModelViewSet):
+    serializer_class = serializers.ElevatorSerializer
+
+    @action(methods=["get"], detail=True)
+    def mark_maintenance(self, request, pk):
+        elevator = crud.mark_maintainance(elevator_id=pk)
+        serializer = serializers.ElevatorSerializer(elevator)
+        return Response(serializer.data)
 
 
 class CreateElevatorRequestViewSet(ModelViewSet):

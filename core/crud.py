@@ -1,15 +1,17 @@
 import sys
 
-from django.db.models import F, Min, Func
+from django.db.models import F, Func, Min
 
 from . import models
 
 
 class ABS(Func):
+    # Custom function for absolute value
     function = "ABS"
 
 
 def create_elevator_system(name: str, no_of_floors: int) -> models.ElevatorSystem:
+    # Create an elevator system instance
     elevator_system_obj = models.ElevatorSystem.objects.create(
         name=name, no_of_floors=no_of_floors
     )
@@ -19,6 +21,7 @@ def create_elevator_system(name: str, no_of_floors: int) -> models.ElevatorSyste
 def create_n_elevators(
     no_of_elevators: int, elevator_system: models.ElevatorSystem
 ) -> str:
+    # Create multiple elevator instances and associate them with the elevator system
     elevator_obj = [
         models.Elevator(elevator_system=elevator_system) for i in range(no_of_elevators)
     ]
@@ -27,6 +30,7 @@ def create_n_elevators(
 
 
 def get_closest_available_elevator(from_floor: int) -> models.Elevator:
+    # Find the closest available elevator based on the requested floor
     closest_available_elevator = (
         models.Elevator.objects.filter(current_status="available")
         .annotate(distance_to_requested=Min(ABS(F("current_floor") - from_floor)))
@@ -34,8 +38,10 @@ def get_closest_available_elevator(from_floor: int) -> models.Elevator:
         .first()
     )
 
+    # Calculate time to reach the available elevator
     available_elevator_time = abs(closest_available_elevator.current_floor - from_floor)
 
+    # Find the closest busy elevator
     busy_elevators = models.Elevator.objects.filter(current_status="busy")
     busy_elevator_time = sys.maxsize
 
@@ -56,10 +62,12 @@ def get_closest_available_elevator(from_floor: int) -> models.Elevator:
                 )
                 previous_floor = elevator_request.to_floor
 
+            # Update the closest busy elevator if it reaches faster
             if elevator_time_to_reach < busy_elevator_time:
                 closest_busy_elevator = elevator
                 busy_elevators_time = elevator_time_to_reach
 
+    # Choose the closest elevator (available or busy) based on time
     if available_elevator_time < busy_elevator_time:
         closest_available_elevator.next_floor = from_floor
         closest_available_elevator.current_status = "busy"
@@ -73,12 +81,14 @@ def get_closest_available_elevator(from_floor: int) -> models.Elevator:
 def create_elevator_request(
     to_floor: int, from_floor: int, closest_elevator: models.Elevator
 ) -> models.ElevatorRequest:
+    # Create an elevator request for the chosen elevator
     return models.ElevatorRequest.objects.create(
         elevator=closest_elevator, to_floor=to_floor, from_floor=from_floor
     )
 
 
 def move_elevator_by_one_floor():
+    # Move busy elevators by one floor based on their current requests
     elevators = models.Elevator.objects.filter(current_status="busy")
     for elevator in elevators:
         elevator_request = (
@@ -94,6 +104,7 @@ def move_elevator_by_one_floor():
                 elevator_request.request_status == "in_process"
                 and elevator.current_floor < elevator_request.to_floor
             ):
+                # Move elevator up one floor
                 elevator.current_floor += 1
                 if elevator.current_floor == elevator_request.to_floor:
                     elevator_request.request_status = "in_service"
@@ -103,6 +114,7 @@ def move_elevator_by_one_floor():
                 elevator_request.request_status == "in_process"
                 and elevator.current_floor > elevator_request.to_floor
             ):
+                # Move elevator down one floor
                 elevator.current_floor -= 1
                 if elevator.current_floor == elevator_request.to_floor:
                     elevator_request.request_status = "in_service"
@@ -112,12 +124,14 @@ def move_elevator_by_one_floor():
                 elevator_request.request_status == "in_process"
                 and elevator.current_floor == elevator_request.to_floor
             ):
+                # Mark the request as in service if the elevator has reached the target floor
                 elevator_request.request_status = "in_service"
                 elevator_request.save()
             elif (
                 elevator_request.request_status == "in_service"
                 and elevator.current_floor < elevator_request.from_floor
             ):
+                # Move elevator up one floor for returning to the original floor
                 elevator.current_floor += 1
                 if elevator.current_floor == elevator_request.from_floor:
                     elevator_request.request_status = "done"
@@ -127,8 +141,28 @@ def move_elevator_by_one_floor():
                 elevator_request.request_status == "in_service"
                 and elevator.current_floor > elevator_request.from_floor
             ):
+                # Move elevator down one floor for returning to the original floor
                 elevator.current_floor -= 1
                 if elevator.current_floor == elevator_request.from_floor:
                     elevator_request.request_status = "done"
                 elevator_request.save()
                 elevator.save()
+
+
+def mark_maintainance(elevator_id: int) -> models.Elevator:
+    elevator = models.Elevator.objects.filter(id=elevator_id).first()
+    if not elevator:
+        pass
+        # TODO validation when elevator does not exits with given elevator id
+        
+    if elevator.current_status != "maintenance":
+        elevator.current_status = "maintenance"
+        elevator.door_status = "closed"
+    else:
+        elevator.current_status = "available"
+    elevator.save()
+    return elevator
+
+
+def get_elevators_count_from_elevator_system(elevator_system_id: int) -> int:
+    return models.Elevator.objects.filter(elevator_system=elevator_system_id).count()

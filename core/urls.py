@@ -5,14 +5,15 @@ from . import views
 
 router = DefaultRouter()
 router.register(r"elevators", views.CreateElevatorSystemViewSet, basename="elevators")
-router.register(
-    r"elevator-request", views.CreateElevatorRequestViewSet, basename="elevator-request"
-)
 
 urlpatterns = [
     path("", include(router.urls)),
     path(
-        "move-elevators",
+        "elevators/move-elevators/",
         views.CreateElevatorRequestViewSet.as_view({"get": "move_elevator"}),
+    ),
+    path(
+        "elevators/mark-maintainance/<int:pk>/",
+        views.ElevatorViewSet.as_view({"get": "mark_maintenance"}),
     ),
 ]
