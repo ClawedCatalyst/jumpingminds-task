@@ -29,6 +29,7 @@ class ElevatorViewSet(ModelViewSet):
 
 class CreateElevatorRequestViewSet(ModelViewSet):
     serializer_class = serializers.ElevatorRequestSerializer
+    
 
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
@@ -37,3 +38,9 @@ class CreateElevatorRequestViewSet(ModelViewSet):
     def move_elevator(self, request, *args, **kwargs):
         crud.move_elevator_by_one_floor()
         return Response({"status": "Elevator moved one floor successfully"})
+    
+    @action(methods=["get"], detail=True)
+    def get_elevator_requests(self, request, pk=None, done=None):
+        elevator_requests = crud.get_elevator_requests_for_elevator(elevator_id=pk, done=done)
+        serializer = serializers.ElevatorRequestSerializer(elevator_requests, many=True)
+        return Response(serializer.data)
